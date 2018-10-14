@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 
 
 class LDA:
@@ -40,10 +42,53 @@ class LDA:
         return np.count_nonzero(self.predict(x) == y) / len(y)
 
     def plot(self, x, y):
-        a = np.linspace(0, 10, 1000)
-        sep = lambda x: (- np.log(self.alpha) - self.w[0] * x) / self.w[1]
-        plt.plot(x=a, y=sep(a), color='black')
-        plt.scatter(x[:, 0], x[:, 1], c=y)
+        if not self.fitted:
+            raise NameError('Not fitted')
+        a = np.array([x[:, 0].min(), x[:, 0].max()])
+        sep = lambda e: (- np.log(self.alpha) - self.w[0] * e) / self.w[1]
+        df = pd.DataFrame()
+        df['x1'] = x[:, 0]
+        df['x2'] = x[:, 1]
+        df['category'] = y
+        fg = sns.lmplot(x='x1', y='x2', hue='category', data=df, fit_reg=False)
+        fg.axes[0, 0].plot(a, sep(a))
         plt.show()
-        print(sep(a))
-        plt.show()
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
+def inv_sigmoid(x):
+    return sigmoid(x) * sigmoid(-x)
+
+
+class IRLS:
+    def __init__(self, epsilon=10 ** (-5), max_step=1000):
+        self.w = 0
+        self.epsilon = epsilon
+        self.max_step = max_step
+        self.fitted = False
+
+    def fit(self, x, y):
+        X = np.c_[x, np.ones(len(x))]
+        w = np.random.rand(np.shape(X)[1])
+        update = [1000]
+        step = 0
+        while (step < self.max_step) and (np.linalg.norm(update, 2) > self.epsilon):
+            eta = sigmoid(X @ w)
+            update = np.linalg.inv(X.T @ np.diagflat(eta) @ X) @ X.T @ (y - eta)
+            w += update
+            step += 1
+        self.w = w
+        self.fitted = True
+
+    def predict(self, x):
+        X = np.c_[x, np.ones(len(x))]
+        proba = sigmoid(X @ self.w)
+        prediction = np.zeros(len(x))
+        prediction[proba > .5] = 1
+        return prediction
+
+    def score(self, x, y):
+        return np.count_nonzero(self.predict(x) == y) / len(y)

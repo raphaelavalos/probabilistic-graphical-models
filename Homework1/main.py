@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from models import *
 
@@ -14,12 +15,18 @@ def load_file(file_name):
     return np.array(x), np.array(y)
 
 
+
+
 x, y = load_file('data/classificationA.test')
 
 lda = LDA()
 lda.fit(x, y)
 print(lda.score(x, y))
 
+irls = IRLS()
+irls.fit(x,y)
+print(irls.score(x,y))
+#
 x_t, y_t = load_file('data/classificationA.train')
-print(lda.score(x_t, y_t))
-lda.plot(x,y)
+# print(lda.score(x_t, y_t))
+
