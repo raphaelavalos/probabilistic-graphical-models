@@ -65,8 +65,27 @@ log(\frac{p(y=1 \mid x)}{p(y=0 \mid x)}) &= log(\frac{1-\omega}{\omega}) + \frac
 p(y=1 \mid x) &= \frac{1}{1+\frac{w}{1-w}\exp{(\frac{1}{2}(\mu_1^T\Sigma^{-1}\mu_1 - \mu_0^T\Sigma^{-1}\mu_0 ))}\exp{(-x^T\Sigma^{-1}(\mu_1-\mu_0))}}
 \end{align*}
 It is of the form
-$$ p(y=1 \mid x) = \frac{1}{1+\alpha\exp{x^Ta}} $$
-If $\alpha = 1$ we find the formula of logistic regression
+$$ p(y=1 \mid x) = \frac{1}{1+\exp{(-(x^Ta+\alpha))}} $$
+It is the formula of logistic regression
 
 \subsection{QDA model}
+We have $N$ samples and $n=\mid \{i, y_i = 0, \forall i \in [1,N]\}\mid $
+\begin{align*}
+l(\omega,\Sigma_0, \Sigma_1, \mu_0,\mu_1) &= \sum_{i=1}^N log (p(x_i,y_i)) \\
+&= \sum_{i=1}^N log(p(x_i \mid  y_i)p(y_i))\\
+&= \sum_{\substack{i=1,\\ y_i=0}}^N log(p(x_i\mid y_i=0)) + nlog(\omega) +  \sum_{\substack{i=1,\\ y_i=0}}^N log(p(x_i\mid y_i=1)) + (N-n)log(1 - \omega)\\
+&= nlog(\omega) - \frac{Nd}{2}log(2\pi) + \frac{n}{2}log(\mid \Sigma_0^{-1}\mid)  - \sum_{\substack{i=1,\\ y_i=0}}^N \frac{1}{2}(x_i - \mu_0)^T \Sigma_0^{-1}(x_i - \mu_0) \\ & + (N-n)log(1 -\omega) + \frac{N-n}{2}log(\mid \Sigma_1^{-1}\mid) - \sum_{\substack{i=1,\\ y_i=1}}^N \frac{1}{2}(x_i - \mu_1)^T \Sigma_1^{-1}(x_i - \mu_1)
+\end{align*}
+This log likelyhood is not concave in $(\omega,\Sigma_0, \Sigma_1, \mu_0, \mu_1)$. It is concave in $(\omega, \mu_0, \mu_1)$ with $\Sigma_0$ and $\Sigma_1$ fixed. We obtain like in the previous questions.
+\begin{align*}
+\tilde{\omega} &= \frac{n}{N} \\
+\tilde{\mu}_0 &= \frac{1}{n} \sum_{\substack{i=1,\\ y_i=0}}^N x_i \\
+\tilde{\mu}_1 &= \frac{1}{N-n} \sum_{\substack{i=1,\\ y_i=1}}^N x_i
+\end{align*}
+Differentiating $l$ w.r.t. $\Sigma_0^{-1}$ with the rest fixed and equalizing to 0 (and then doing the same with $\Sigma_1^{-1}$) gives us.
+\begin{align*}
+\tilde{\Sigma}_0 &= \frac{1}{n} \sum_{\substack{i=1,\\ y_i=0}}^N (x_i - \mu_0)^T(x_i - \mu_0) \\
+\tilde{\Sigma}_1 &= \frac{1}{N-n} \sum_{\substack{i=1,\\ y_i=1}}^N (x_i - \mu_1)^T(x_i - \mu_1)
+\end{align*}
+We did not provide the calculations because it is amlost the same as above.
 \end{document}

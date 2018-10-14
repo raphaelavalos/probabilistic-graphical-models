@@ -15,17 +15,11 @@ def load_file(file_name):
     return np.array(x), np.array(y)
 
 
-
-
 x, y = load_file('data/classificationA.test')
-
-
 
 x_t, y_t = load_file('data/classificationA.train')
 
-lr = LinearRegression()
-lr.fit(x,y)
-print(lr.score(x_t,y_t))
-lr.plot(x_t,y_t)
-# print(lda.score(x_t, y_t))
-
+qda = QDA()
+qda.fit(x,y)
+print(qda.score(x, y))
+print(qda.score(x_t, y_t))
