@@ -19,14 +19,13 @@ def load_file(file_name):
 
 x, y = load_file('data/classificationA.test')
 
-lda = LDA()
-lda.fit(x, y)
-print(lda.score(x, y))
 
-irls = IRLS()
-irls.fit(x,y)
-print(irls.score(x,y))
-#
+
 x_t, y_t = load_file('data/classificationA.train')
+
+lr = LinearRegression()
+lr.fit(x,y)
+print(lr.score(x_t,y_t))
+lr.plot(x_t,y_t)
 # print(lda.score(x_t, y_t))
 

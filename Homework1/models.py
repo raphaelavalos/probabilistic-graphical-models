@@ -64,7 +64,7 @@ def inv_sigmoid(x):
 
 
 class IRLS:
-    def __init__(self, epsilon=10 ** (-5), max_step=1000):
+    def __init__(self, epsilon=10 ** (-4), max_step=1000):
         self.w = 0
         self.epsilon = epsilon
         self.max_step = max_step
@@ -81,9 +81,12 @@ class IRLS:
             w += update
             step += 1
         self.w = w
+        print(update)
         self.fitted = True
 
     def predict(self, x):
+        if not self.fitted:
+            raise NameError('Not fitted')
         X = np.c_[x, np.ones(len(x))]
         proba = sigmoid(X @ self.w)
         prediction = np.zeros(len(x))
@@ -92,3 +95,52 @@ class IRLS:
 
     def score(self, x, y):
         return np.count_nonzero(self.predict(x) == y) / len(y)
+
+    def plot(self, x, y):
+        if not self.fitted:
+            raise NameError('Not fitted')
+        a = np.array([x[:, 0].min(), x[:, 0].max()])
+        sep = lambda e: -(self.w[2] + self.w[0] * e) / self.w[1]
+        df = pd.DataFrame()
+        df['x1'] = x[:, 0]
+        df['x2'] = x[:, 1]
+        df['category'] = y
+        fg = sns.lmplot(x='x1', y='x2', hue='category', data=df, fit_reg=False)
+        fg.axes[0, 0].plot(a, sep(a))
+        plt.show()
+
+class LinearRegression:
+    def __init__(self):
+        self.w = 0
+        self.fitted = False
+
+    def fit(self, x, y):
+        X = np.c_[x, np.ones(len(x))]
+        self.w = np.linalg.inv(X.T @ X) @ X.T @ y
+        self.fitted = True
+        print(self.w)
+
+    def predict(self, x):
+        if not self.fitted:
+            raise NameError('Not fitted')
+        X = np.c_[x, np.ones(len(x))]
+        tmp = X @ self.w
+        prediction = np.zeros(len(x))
+        prediction[tmp > .5] = 1
+        return prediction
+
+    def score(self, x, y):
+        return np.count_nonzero(self.predict(x) == y) / len(y)
+
+    def plot(self, x, y):
+        if not self.fitted:
+            raise NameError('Not fitted')
+        a = np.array([x[:, 0].min(), x[:, 0].max()])
+        sep = lambda e: ( .5 - self.w[2] - self.w[0] * e )/ self.w[1]
+        df = pd.DataFrame()
+        df['x1'] = x[:, 0]
+        df['x2'] = x[:, 1]
+        df['category'] = y
+        fg = sns.lmplot(x='x1', y='x2', hue='category', data=df, fit_reg=False)
+        fg.axes[0, 0].plot(a, sep(a))
+        plt.show()
