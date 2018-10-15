@@ -64,7 +64,7 @@ def inv_sigmoid(x):
 
 
 class IRLS:
-    def __init__(self, epsilon=10 ** (-4), max_step=1000):
+    def __init__(self, epsilon=10 ** (-4), max_step=10000):
         self.w = 0
         self.epsilon = epsilon
         self.max_step = max_step
@@ -81,7 +81,6 @@ class IRLS:
             w += update
             step += 1
         self.w = w
-        print(update)
         self.fitted = True
 
     def predict(self, x):
@@ -119,7 +118,6 @@ class LinearRegression:
         X = np.c_[x, np.ones(len(x))]
         self.w = np.linalg.inv(X.T @ X) @ X.T @ y
         self.fitted = True
-        print(self.w)
 
     def predict(self, x):
         if not self.fitted:
@@ -158,6 +156,7 @@ class QDA:
         self.mu1 = 0
         self.w = 0
         self.alpha = 0
+        self.poly_on_y = lambda x: x
         self.fitted = False
 
     def fit(self, x, y):
@@ -171,6 +170,12 @@ class QDA:
         self.inv_sigma0 = np.linalg.inv(self.sigma0)
         self.inv_sigma1 = np.linalg.inv(self.sigma1)
         self.alpha = self.pi / (1 - self.pi) * np.sqrt(np.linalg.det(self.sigma0) / np.linalg.det(self.sigma1))
+        pond_diff_inv_sigma = self.mu1.T @ self.inv_sigma1 - self.mu0.T @ self.inv_sigma0
+        diff_inv_sigma = self.inv_sigma0 - self.inv_sigma1
+        self.poly_on_y = lambda e: np.array(
+            [.5 * diff_inv_sigma[1, 1], diff_inv_sigma[1, 0] * e + pond_diff_inv_sigma[1],
+             .5 * diff_inv_sigma[0, 0] * e * e + pond_diff_inv_sigma[0] * e + np.exp(
+                 self.alpha) - self.mu1.T @ self.inv_sigma1 @ self.mu1 + self.mu0.T @ self.inv_sigma0 @ self.mu0 ])
         self.fitted = True
 
     def predict(self, x):
@@ -191,12 +196,15 @@ class QDA:
     def plot(self, x, y):
         if not self.fitted:
             raise NameError('Not fitted')
-        a = np.array([x[:, 0].min(), x[:, 0].max()])
-        sep = lambda e: (- np.log(self.alpha) - self.w[0] * e) / self.w[1]
+        a = np.linspace(x[:, 0].min(), x[:, 0].max(), 100)
+        e = np.array(list(map(lambda v: np.roots(self.poly_on_y(v)), a)))
+        a = np.array([np.full_like(e[i], a[i]) for i in range(len(a))]).flatten()
+        e = e.flatten()
+        x2_max = x[:,1].max()
         df = pd.DataFrame()
         df['x1'] = x[:, 0]
         df['x2'] = x[:, 1]
         df['category'] = y
         fg = sns.lmplot(x='x1', y='x2', hue='category', data=df, fit_reg=False)
-        fg.axes[0, 0].plot(a, sep(a))
+        #fg.axes[0, 0].plot(a[e<x2_max], e[e<x2_max], )
         plt.show()

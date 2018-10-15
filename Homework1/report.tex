@@ -1,13 +1,173 @@
-\documentclass[]{article}
+\documentclass[a4paper]{article}
 \usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage{amsbsy}
 \usepackage{amsmath}
-\title{Homework 1}
+\usepackage[
+  margin=1.5cm,
+  includefoot,
+  footskip=30pt,
+]{geometry}
+\usepackage{layout}
+\usepackage{graphicx}
+\title{Probabilistic Graphical Models : Homework 1}
+\author{Raphael Avalos\\raphael@avalos.fr}
 \date{10/10/18}
-
+\graphicspath{ {./plots/} }
 \begin{document}
-\section{Exercise 1}
+\maketitle
+\section{Formulas}
+\subsection{Exercise 1}
+We have $N$ samples $(x_i,y_i)$
+$\pmb{\pi} = (\pi_1, ..., \pi_M), \pmb{\theta} = (\theta_{1,1}, ... \theta_{M,K})$	\\
+$a_m = \mid \{ i \mid  z_i = m, \forall i \in [1,N]\}\mid $, $b_{m,k} = \mid \{ i \mid  z_i = m \text{ and } x_i = k, \forall i \in [1,N]\}\mid $
+\begin{align*}
+\tilde{\pi}_m &= \frac{a_m}{N} \\
+\tilde{\theta}_{m,k} &= \frac{b_{m,k}}{N}
+\end{align*}
+Moreover $p(y=1 \mid x)$ have the same form of logistic regression.
+\subsection{Exercise 2}
+\subsubsection{LDA}
+\begin{align*}
+\tilde{\omega} &= \frac{n}{N} \\
+\tilde{\mu}_0 &= \frac{1}{n} \sum_{\substack{i=1,\\ y_i=0}}^N x_i \\
+\tilde{\mu}_1 &= \frac{1}{N-n} \sum_{\substack{i=1,\\ y_i=1}}^N x_i \\
+\tilde{\Sigma} &= \frac{1}{N}(\sum_{\substack{i=1,\\ y_i=0}}^N (x_i - \mu_0)^T(x_i - \mu_0) + \sum_{\substack{i=1,\\ y_i=1}}^N (x_i - \mu_1)^T(x_i - \mu_1))
+\end{align*}
+\subsubsection{QDA}
+We have $N$ samples and $n=\mid \{i, y_i = 0, \forall i \in [1,N]\}\mid $
+\begin{align*}
+\tilde{\omega} &= \frac{n}{N} \\
+\tilde{\mu}_0 &= \frac{1}{n} \sum_{\substack{i=1,\\ y_i=0}}^N x_i \\
+\tilde{\mu}_1 &= \frac{1}{N-n} \sum_{\substack{i=1,\\ y_i=1}}^N x_i \\
+\tilde{\Sigma}_0 &= \frac{1}{n} \sum_{\substack{i=1,\\ y_i=0}}^N (x_i - \mu_0)^T(x_i - \mu_0) \\
+\tilde{\Sigma}_1 &= \frac{1}{N-n} \sum_{\substack{i=1,\\ y_i=1}}^N (x_i - \mu_1)^T(x_i - \mu_1)
+\end{align*}
+\newpage
+\section{Dataset A}
+\begin{figure}[h]
+\centering
+\begin{minipage}{0,45\textwidth}
+\caption{LDA}
+\includegraphics[scale=.4]{a_lda.png}
+\end{minipage}
+\begin{minipage}{0,45\textwidth}
+\caption{IRLS}
+\includegraphics[scale=.4]{a_irls.png}
+\end{minipage}
+\begin{minipage}{0,45\textwidth}
+\caption{Linear Regression}
+\includegraphics[scale=.4]{a_lr.png}
+\end{minipage}
+\begin{minipage}{0,45\textwidth}
+\caption{QDA}
+\includegraphics[scale=.4]{a_qda.png}
+\end{minipage}
+\end{figure}
+\begin{minipage}[c]{0,35\textwidth}
+Results\\
+\begin{tabular}{|c|c|c|}
+\hline 
+• & Train & Test \\ 
+\hline 
+LDA & 98.7 & 98.0 \\ 
+\hline 
+IRLS & 100 & 96.5 \\ 
+\hline 
+LR & 98.7 & 97.9 \\ 
+\hline 
+QDA & 95.3 & 96.9 \\ 
+\hline 
+\end{tabular} 
+\end{minipage}
+\begin{minipage}{0,6\textwidth}
+First we see that the model is linearly separable. IRLS scores perfectly on the training set outperforming the other models. However the situation is reversed on the test data. This means that the model overfitted the training data. LDA and Liogistic Regression have the same performance which is not a surprise considering that we have proven that the LDA performs in reality a logistic regression. Finally QDA has the worst performance on the training set, but outperforms IRLS on the test data. It is the only model to have improve its test score over its traing score which is great.
+\end{minipage}
+\newpage
+\section{Dataset B}
+\begin{figure}[h]
+\centering
+\begin{minipage}{0,45\textwidth}
+\caption{LDA}
+\includegraphics[scale=.4]{b_lda.png}
+\end{minipage}
+\begin{minipage}{0,45\textwidth}
+\caption{IRLS}
+\includegraphics[scale=.4]{b_irls.png}
+\end{minipage}
+\begin{minipage}{0,45\textwidth}
+\caption{Linear Regression}
+\includegraphics[scale=.4]{b_lr.png}
+\end{minipage}
+\begin{minipage}{0,45\textwidth}
+\caption{QDA}
+\includegraphics[scale=.4]{b_qda.png}
+\end{minipage}
+\end{figure}
+\begin{minipage}[c]{0,35\textwidth}
+Results\\
+\begin{tabular}{|c|c|c|}
+\hline 
+• & Train & Test \\ 
+\hline 
+LDA & 97.0 & 95.9 \\ 
+\hline 
+IRLS & 98.0 & 95.7 \\ 
+\hline 
+LR & 95.0 & 95.9 \\ 
+\hline 
+QDA & 94.0 & 93.3 \\ 
+\hline 
+\end{tabular} 
+\end{minipage}
+\begin{minipage}{0,6\textwidth}
+First we see that the model is linearly separable. IRLS scores perfectly on the training set outperforming the other models. However the situation is reversed on the test data. This means that the model overfitted the training data. LDA and Liogistic Regression have the same performance which is not a surprise considering that we have proven that the LDA performs in reality a logistic regression. Finally QDA has the worst performance on the training set, but outperforms IRLS on the test data. It is the only model to have improve its test score over its traing score which is great.
+\end{minipage}
+\newpage
+\section{Dataset C}
+\begin{figure}[h]
+\centering
+\begin{minipage}{0,45\textwidth}
+\caption{LDA}
+\includegraphics[scale=.4]{c_lda.png}
+\end{minipage}
+\begin{minipage}{0,45\textwidth}
+\caption{IRLS}
+\includegraphics[scale=.4]{c_irls.png}
+\end{minipage}
+\begin{minipage}{0,45\textwidth}
+\caption{Linear Regression}
+\includegraphics[scale=.4]{c_lr.png}
+\end{minipage}
+\begin{minipage}{0,45\textwidth}
+\caption{QDA}
+\includegraphics[scale=.4]{c_qda.png}
+\end{minipage}
+\end{figure}
+\begin{minipage}[c]{0,35\textwidth}
+Results\\
+\begin{tabular}{|c|c|c|}
+\hline 
+• & Train & Test \\ 
+\hline 
+LDA & 97.0 & 95.9 \\ 
+\hline 
+IRLS & 98.0 & 95.7 \\ 
+\hline 
+LR & 95.0 & 95.9 \\ 
+\hline 
+QDA & 94.0 & 93.3 \\ 
+\hline 
+\end{tabular} 
+\end{minipage}
+\begin{minipage}{0,6\textwidth}
+First we see that the model is linearly separable. IRLS scores perfectly on the training set outperforming the other models. However the situation is reversed on the test data. This means that the model overfitted the training data. LDA and Liogistic Regression have the same performance which is not a surprise considering that we have proven that the LDA performs in reality a logistic regression. Finally QDA has the worst performance on the training set, but outperforms IRLS on the test data. It is the only model to have improve its test score over its traing score which is great.
+\end{minipage}
+\newpage
+\section{Comments on the models}
+\newpage
+\section{Proof}
+\subsection{Exercise 1}
 We have $N$ samples $(x_i,y_i)$
 $\pmb{\pi} = (\pi_1, ..., \pi_M), \pmb{\theta} = (\theta_{1,1}, ... \theta_{M,K})$	\\
 $a_m = \mid \{ i \mid  z_i = m, \forall i \in [1,N]\}\mid $, $b_{m,k} = \mid \{ i \mid  z_i = m \text{ and } x_i = k, \forall i \in [1,N]\}\mid $
@@ -30,8 +190,8 @@ Using the constrains we can calculate $\lambda_1, \lambda_2$.
 \tilde{\theta}_{m,k} &= \frac{b_{m,k}}{N}
 \end{align*}
 
-\section{Exercicse 2}
-\subsection{Generative model LDA}
+\subsection{Exercise 2}
+\subsubsection{Generative model LDA}
 We have $N$ samples and $n=\mid \{i, y_i = 0, \forall i \in [1,N]\}\mid $
 \begin{align*}
 l(\omega,\Sigma,\mu_0,\mu_1) &= \sum_{i=1}^N log (p(x_i,y_i)) \\
@@ -68,7 +228,7 @@ It is of the form
 $$ p(y=1 \mid x) = \frac{1}{1+\exp{(-(x^Ta+\alpha))}} $$
 It is the formula of logistic regression
 
-\subsection{QDA model}
+\subsubsection{QDA model}
 We have $N$ samples and $n=\mid \{i, y_i = 0, \forall i \in [1,N]\}\mid $
 \begin{align*}
 l(\omega,\Sigma_0, \Sigma_1, \mu_0,\mu_1) &= \sum_{i=1}^N log (p(x_i,y_i)) \\

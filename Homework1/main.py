@@ -15,11 +15,28 @@ def load_file(file_name):
     return np.array(x), np.array(y)
 
 
-x, y = load_file('data/classificationA.test')
+a_x, a_y = load_file('data/classificationA.train')
+b_x, b_y = load_file('data/classificationB.train')
+c_x, c_y = load_file('data/classificationC.train')
+a_x_t, a_y_t = load_file('data/classificationA.test')
+b_x_t, b_y_t = load_file('data/classificationB.test')
+c_x_t, c_y_t = load_file('data/classificationC.test')
 
-x_t, y_t = load_file('data/classificationA.train')
+x = c_x
+y = c_y
+x_t = c_x_t
+y_t = c_y_t
 
+
+lda = LDA()
+irls = IRLS()
+lr = LinearRegression()
 qda = QDA()
-qda.fit(x,y)
-print(qda.score(x, y))
-print(qda.score(x_t, y_t))
+
+models = [lda,irls,lr,qda]
+for m in models :
+    print(m.__class__.__name__)
+    m.fit(x,y)
+    m.plot(x,y)
+    print("Train score : %.3f" % m.score(x,y))
+    print("Test score : %.3f" % m.score(x_t,y_t))
