@@ -1,6 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
-
 from models import *
 
 
@@ -22,21 +19,25 @@ a_x_t, a_y_t = load_file('data/classificationA.test')
 b_x_t, b_y_t = load_file('data/classificationB.test')
 c_x_t, c_y_t = load_file('data/classificationC.test')
 
-x = c_x
-y = c_y
+x = a_x
+y = a_y
 x_t = c_x_t
 y_t = c_y_t
 
+d = dict()
+d['a'] = load_file('data/classificationA.train'), load_file('data/classificationA.test')
+d['b'] = load_file('data/classificationB.train'), load_file('data/classificationB.test')
+d['c'] = load_file('data/classificationC.train'), load_file('data/classificationC.test')
 
-lda = LDA()
-irls = IRLS()
-lr = LinearRegression()
-qda = QDA()
-
-models = [lda,irls,lr,qda]
-for m in models :
-    print(m.__class__.__name__)
-    m.fit(x,y)
-    m.plot(x,y)
-    print("Train score : %.3f" % m.score(x,y))
-    print("Test score : %.3f" % m.score(x_t,y_t))
+models = [LDA, IRLS, LinearRegression, QDA]
+for key in d.keys():
+    print('Dataset %s :\n' % key)
+    (x, y), (x_t, y_t) = d[key]
+    for model in models:
+        print('\t%s' % model.__name__)
+        m = model()
+        m.fit(x, y)
+        print("\t\tTrain score : %.3f" % m.score(x, y))
+        print("\t\tTest score : %.3f" % m.score(x_t, y_t))
+        m.plot(x, y)
+    print('\n')

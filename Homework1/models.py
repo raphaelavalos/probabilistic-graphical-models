@@ -6,12 +6,12 @@ import pandas as pd
 
 class LDA:
     def __init__(self):
-        self.sigma = 0
-        self.inv_sigma = 0
+        self.sigma = np.identity(2)
+        self.inv_sigma = np.identity(2)
         self.pi = 0
-        self.mu0 = 0
-        self.mu1 = 0
-        self.w = 0
+        self.mu0 = np.zeros((2,))
+        self.mu1 = np.zeros((2,))
+        self.w = np.zeros((2,))
         self.alpha = 0
         self.fitted = False
 
@@ -24,16 +24,15 @@ class LDA:
         self.sigma = (np.sum([np.outer(xi - self.mu0, xi - self.mu0) for xi in x[y == 0]], axis=0) + np.sum(
             [np.outer(xi - self.mu1, xi - self.mu1) for xi in x[y == 1]], axis=0)) / N
         self.inv_sigma = np.linalg.inv(self.sigma)
-        self.w = - np.dot(self.inv_sigma, self.mu1 - self.mu0)
-        self.alpha = self.pi / (1 - self.pi) * np.exp(.5 * (
-                np.dot(self.mu1.T, np.dot(self.inv_sigma, self.mu1)) - np.dot(self.mu0.T,
-                                                                              np.dot(self.inv_sigma, self.mu0))))
+        self.w = - self.inv_sigma @ (self.mu1 - self.mu0)
+        self.alpha = ((1 - self.pi) / self.pi) * np.exp(
+            .5 * ((self.mu0.T @ self.inv_sigma @ self.mu0) - (self.mu1.T @ self.inv_sigma @ self.mu1)))
         self.fitted = True
 
     def predict(self, x):
         if not self.fitted:
             raise NameError('Not fitted')
-        tmp = - np.log(self.alpha) - np.dot(x, self.w)
+        tmp = np.log(self.alpha) - x @ self.w
         predictions = np.zeros(len(x))
         predictions[tmp > 0] = 1
         return predictions
@@ -45,13 +44,13 @@ class LDA:
         if not self.fitted:
             raise NameError('Not fitted')
         a = np.array([x[:, 0].min(), x[:, 0].max()])
-        sep = lambda e: (- np.log(self.alpha) - self.w[0] * e) / self.w[1]
+        sep = lambda e: (np.log(self.alpha) - self.w[0] * e) / self.w[1]
         df = pd.DataFrame()
         df['x1'] = x[:, 0]
         df['x2'] = x[:, 1]
         df['category'] = y
         fg = sns.lmplot(x='x1', y='x2', hue='category', data=df, fit_reg=False)
-        fg.axes[0, 0].plot(a, sep(a))
+        fg.axes[0, 0].plot(a, sep(a), c="black")
         plt.show()
 
 
@@ -105,7 +104,7 @@ class IRLS:
         df['x2'] = x[:, 1]
         df['category'] = y
         fg = sns.lmplot(x='x1', y='x2', hue='category', data=df, fit_reg=False)
-        fg.axes[0, 0].plot(a, sep(a))
+        fg.axes[0, 0].plot(a, sep(a), c="black")
         plt.show()
 
 
@@ -141,21 +140,23 @@ class LinearRegression:
         df['x2'] = x[:, 1]
         df['category'] = y
         fg = sns.lmplot(x='x1', y='x2', hue='category', data=df, fit_reg=False)
-        fg.axes[0, 0].plot(a, sep(a))
+        fg.axes[0, 0].plot(a, sep(a), c="black")
         plt.show()
 
 
 class QDA:
     def __init__(self):
-        self.sigma0 = 0
-        self.sigma1 = 0
-        self.inv_sigma0 = 0
-        self.inv_sigma1 = 0
+        self.sigma0 = np.identity(2)
+        self.sigma1 = np.identity(2)
+        self.inv_sigma0 = np.identity(2)
+        self.inv_sigma1 = np.identity(2)
         self.pi = 0
-        self.mu0 = 0
-        self.mu1 = 0
-        self.w = 0
+        self.mu0 = np.zeros((2,))
+        self.mu1 = np.zeros((2,))
+        self.w = np.zeros(2, )
         self.alpha = 0
+        self.a = 0
+        self.P = np.zeros((2, 2))
         self.poly_on_y = lambda x: x
         self.fitted = False
 
@@ -170,24 +171,21 @@ class QDA:
         self.inv_sigma0 = np.linalg.inv(self.sigma0)
         self.inv_sigma1 = np.linalg.inv(self.sigma1)
         self.alpha = self.pi / (1 - self.pi) * np.sqrt(np.linalg.det(self.sigma0) / np.linalg.det(self.sigma1))
-        pond_diff_inv_sigma = self.mu1.T @ self.inv_sigma1 - self.mu0.T @ self.inv_sigma0
-        diff_inv_sigma = self.inv_sigma0 - self.inv_sigma1
+        self.a = np.log(
+            ((1 - self.pi) / self.pi) * np.sqrt(np.linalg.det(self.sigma0) / np.linalg.det(self.sigma1))) + .5 * (
+                             self.mu0.T @ self.inv_sigma0 @ self.mu0 - self.mu1.T @ self.inv_sigma1 @ self.mu1)
+        self.w = self.inv_sigma1 @ self.mu1 - self.inv_sigma0 @ self.mu0
+        self.P = .5 * (self.inv_sigma0 - self.inv_sigma1)
         self.poly_on_y = lambda e: np.array(
-            [.5 * diff_inv_sigma[1, 1], diff_inv_sigma[1, 0] * e + pond_diff_inv_sigma[1],
-             .5 * diff_inv_sigma[0, 0] * e * e + pond_diff_inv_sigma[0] * e + np.exp(
-                 self.alpha) - self.mu1.T @ self.inv_sigma1 @ self.mu1 + self.mu0.T @ self.inv_sigma0 @ self.mu0 ])
+            [self.P[1, 1], 2 * self.P[1, 0] * e + self.w[1], self.a + e * self.w[0] + self.P[0, 0] * e * e])
         self.fitted = True
 
     def predict(self, x):
         if not self.fitted:
             raise NameError('Not fitted')
-        dif0 = x - self.mu0
-        dif1 = x - self.mu1
-        norm0 = .5 * np.einsum('ij,ij -> i', dif0 @ self.sigma0, dif0)
-        norm1 = - .5 * np.einsum('ij,ij -> i', dif1 @ self.sigma1, dif1)
-        tmp = np.log(self.alpha) + norm0 + norm1
+        probas = self.a + x @ self.w + np.einsum('ij,ij -> i', x @ self.P, x)
         predictions = np.zeros(len(x))
-        predictions[tmp > 0] = 1
+        predictions[probas > 0] = 1
         return predictions
 
     def score(self, x, y):
@@ -196,15 +194,16 @@ class QDA:
     def plot(self, x, y):
         if not self.fitted:
             raise NameError('Not fitted')
-        a = np.linspace(x[:, 0].min(), x[:, 0].max(), 100)
+        a = np.linspace(x[:, 0].min(), x[:, 0].max(), 1000)
         e = np.array(list(map(lambda v: np.roots(self.poly_on_y(v)), a)))
-        a = np.array([np.full_like(e[i], a[i]) for i in range(len(a))]).flatten()
-        e = e.flatten()
-        x2_max = x[:,1].max()
+        k, l = np.array(list(
+            zip(*[(np.full_like(np.real(e[i]), a[i]), np.real(e[i])) for i in range(len(a)) if np.isreal(e[i]).any()])))
+        k = k.flatten()
+        l = l.flatten()
         df = pd.DataFrame()
         df['x1'] = x[:, 0]
         df['x2'] = x[:, 1]
         df['category'] = y
         fg = sns.lmplot(x='x1', y='x2', hue='category', data=df, fit_reg=False)
-        #fg.axes[0, 0].plot(a[e<x2_max], e[e<x2_max], )
+        fg.axes[0, 0].scatter(k, l, s=1, c='black')
         plt.show()
