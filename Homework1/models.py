@@ -63,15 +63,21 @@ def inv_sigmoid(x):
 
 
 class IRLS:
-    def __init__(self, epsilon=10 ** (-4), max_step=10000):
-        self.w = 0
+    def __init__(self, epsilon=10 ** (-4), max_step=10000, tau=0.8, amarijo_max_step=10, control=.01, amarijo=True, modified=False):
+        self.w = np.random.rand(3)
         self.epsilon = epsilon
         self.max_step = max_step
+        self.tau = tau
+        self.control = control
+        self.amarijo_max_step = amarijo_max_step
+        self.amarijo = amarijo
+        self.modifed = modified
         self.fitted = False
 
-    def fit(self, x, y):
+    def modified_fit(self, x, y):
+        print('modified fit')
         X = np.c_[x, np.ones(len(x))]
-        w = np.random.rand(np.shape(X)[1])
+        w = self.w
         update = [1000]
         step = 0
         while (step < self.max_step) and (np.linalg.norm(update, 2) > self.epsilon):
@@ -82,17 +88,54 @@ class IRLS:
         self.w = w
         self.fitted = True
 
-    def predict(self, x):
-        if not self.fitted:
-            raise NameError('Not fitted')
+    def amarijo_line_search(self, x, y, w, direction):
+        t = - self.control * self.amarijo_max_step
+        j = 0
+        step = self.amarijo_max_step
+        fw = self.score(x, y, w)
+        fwn = self.score(x, y, w + step * direction)
+        while (fw - fwn >= step * t) and ((j>1000) or (fw -fwn > 0)):
+            j += 1
+            step = self.tau * step
+            fwn = self.score(x, y, w + step * direction)
+        return step
+
+    def standard_fit(self, x, y):
         X = np.c_[x, np.ones(len(x))]
-        proba = sigmoid(X @ self.w)
+        w = self.w
+        update = [1000]
+        step = 0
+        while (step < self.max_step) and (np.linalg.norm(update, 2) > self.epsilon):
+            if self.score(x,y,w) >= 1:
+                break
+            eta = sigmoid(X @ w)
+            update = np.linalg.inv(X.T @ np.diagflat(eta * (1 - eta)) @ X) @ X.T @ (y - eta)
+            epsilon = self.amarijo_line_search(x, y, w, update) if self.amarijo else 1
+            update = epsilon * update
+            w += update
+            step += 1
+        self.w = w
+        self.fitted = True
+
+    def fit(self, x, y):
+        if self.modifed:
+            self.modified_fit(x,y)
+        else :
+            self.standard_fit(x,y)
+
+    def predict(self, x, w=None):
+        if not self.fitted and (w is None):
+            raise NameError('Not fitted')
+        if w is None:
+            w = self.w
+        X = np.c_[x, np.ones(len(x))]
+        proba = sigmoid(X @ w)
         prediction = np.zeros(len(x))
         prediction[proba > .5] = 1
         return prediction
 
-    def score(self, x, y):
-        return np.count_nonzero(self.predict(x) == y) / len(y)
+    def score(self, x, y, w=None):
+        return np.count_nonzero(self.predict(x, w) == y) / len(y)
 
     def plot(self, x, y):
         if not self.fitted:
@@ -173,7 +216,7 @@ class QDA:
         self.alpha = self.pi / (1 - self.pi) * np.sqrt(np.linalg.det(self.sigma0) / np.linalg.det(self.sigma1))
         self.a = np.log(
             ((1 - self.pi) / self.pi) * np.sqrt(np.linalg.det(self.sigma0) / np.linalg.det(self.sigma1))) + .5 * (
-                             self.mu0.T @ self.inv_sigma0 @ self.mu0 - self.mu1.T @ self.inv_sigma1 @ self.mu1)
+                         self.mu0.T @ self.inv_sigma0 @ self.mu0 - self.mu1.T @ self.inv_sigma1 @ self.mu1)
         self.w = self.inv_sigma1 @ self.mu1 - self.inv_sigma0 @ self.mu0
         self.P = .5 * (self.inv_sigma0 - self.inv_sigma1)
         self.poly_on_y = lambda e: np.array(

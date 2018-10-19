@@ -39,5 +39,5 @@ for key in d.keys():
         m.fit(x, y)
         print("\t\tTrain score : %.3f" % m.score(x, y))
         print("\t\tTest score : %.3f" % m.score(x_t, y_t))
-        m.plot(x, y)
+        # m.plot(x, y)
     print('\n')
