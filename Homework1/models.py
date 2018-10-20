@@ -63,22 +63,48 @@ def inv_sigmoid(x):
 
 
 class IRLS:
-    def __init__(self, epsilon=10 ** (-4), max_step=10000, tau=0.8, amarijo_max_step=10, control=.01, amarijo=True, modified=False):
+    def __init__(self, max_step=10000, alpha=.4, beta=.8, modified=False, epsilon=10 ** (-4)):
         self.w = np.random.rand(3)
         self.epsilon = epsilon
         self.max_step = max_step
-        self.tau = tau
-        self.control = control
-        self.amarijo_max_step = amarijo_max_step
-        self.amarijo = amarijo
+        self.alpha = alpha
+        self.beta = beta
         self.modifed = modified
         self.fitted = False
+
+    # In the following code the hessian and the grad is not of - log likelihood
+
+    def normal_fit(self, x, y):
+        X = np.c_[x, np.ones(len(x))]
+        w = self.w
+        step = 0
+        lambda_square = self.epsilon + 1
+
+        def log_likelihood(w):
+            return np.log(sigmoid((2 * y - 1) * (X @ w))).sum()
+
+        while (step < self.max_step) and (lambda_square > self.epsilon):
+            eta = sigmoid(X @ w)
+            hessian = X.T @ np.diagflat(eta * (1 - eta)) @ X
+            hessian_inv = np.linalg.inv(hessian)
+            grad = - X.T @ (y - eta)
+            delta_w = - hessian_inv @ grad
+            lambda_square = - grad.T @ delta_w
+            t = 1
+            lw = log_likelihood(w)
+            limit = self.alpha * grad @ delta_w
+            while lw - log_likelihood(w + t * delta_w) >= t * limit:
+                t *= self.beta
+            w += t * delta_w
+            step += 1
+        self.w = w
+        self.fitted = True
 
     def modified_fit(self, x, y):
         print('modified fit')
         X = np.c_[x, np.ones(len(x))]
         w = self.w
-        update = [1000]
+        update = [self.epsilon + 1]
         step = 0
         while (step < self.max_step) and (np.linalg.norm(update, 2) > self.epsilon):
             eta = sigmoid(X @ w)
@@ -88,40 +114,11 @@ class IRLS:
         self.w = w
         self.fitted = True
 
-    def amarijo_line_search(self, x, y, w, direction):
-        t = - self.control * self.amarijo_max_step
-        j = 0
-        step = self.amarijo_max_step
-        fw = self.score(x, y, w)
-        fwn = self.score(x, y, w + step * direction)
-        while (fw - fwn >= step * t) and ((j>1000) or (fw -fwn > 0)):
-            j += 1
-            step = self.tau * step
-            fwn = self.score(x, y, w + step * direction)
-        return step
-
-    def standard_fit(self, x, y):
-        X = np.c_[x, np.ones(len(x))]
-        w = self.w
-        update = [1000]
-        step = 0
-        while (step < self.max_step) and (np.linalg.norm(update, 2) > self.epsilon):
-            if self.score(x,y,w) >= 1:
-                break
-            eta = sigmoid(X @ w)
-            update = np.linalg.inv(X.T @ np.diagflat(eta * (1 - eta)) @ X) @ X.T @ (y - eta)
-            epsilon = self.amarijo_line_search(x, y, w, update) if self.amarijo else 1
-            update = epsilon * update
-            w += update
-            step += 1
-        self.w = w
-        self.fitted = True
-
     def fit(self, x, y):
         if self.modifed:
-            self.modified_fit(x,y)
-        else :
-            self.standard_fit(x,y)
+            self.modified_fit(x, y)
+        else:
+            self.normal_fit(x, y)
 
     def predict(self, x, w=None):
         if not self.fitted and (w is None):
