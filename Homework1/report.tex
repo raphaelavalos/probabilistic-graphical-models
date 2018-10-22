@@ -49,30 +49,30 @@ We have $N$ samples and $n=\mid \{i, y_i = 0, \forall i \in [1,N]\}\mid $
 \centering
 \begin{minipage}{0,45\textwidth}
 \caption{LDA}
-\includegraphics[scale=.5]{a_lda.png}
+\includegraphics[scale=.45]{a_lda.png}
 \end{minipage}
 \begin{minipage}{0,45\textwidth}
 \caption{IRLS}
-\includegraphics[scale=.5]{a_irls.png}
+\includegraphics[scale=.45]{a_irls.png}
 \end{minipage}
 \begin{minipage}{0,45\textwidth}
 \caption{Linear Regression}
-\includegraphics[scale=.5]{a_lr.png}
+\includegraphics[scale=.45]{a_lr.png}
 \end{minipage}
 \begin{minipage}{0,45\textwidth}
 \caption{QDA}
-\includegraphics[scale=.5]{a_qda.png}
+\includegraphics[scale=.45]{a_qda.png}
 \end{minipage}
 \end{figure}
 \begin{minipage}[c]{0,35\textwidth}
-Results\\
+Results (\% of success)\\
 \begin{tabular}{|c|c|c|}
 \hline 
 • & Train & Test \\ 
 \hline 
 LDA & 98.7 & 98.0 \\ 
 \hline 
-IRLS & 100 & 96.5 \\ 
+IRLS & 100 & 96.6 \\ 
 \hline 
 LR & 98.7 & 97.9 \\ 
 \hline 
@@ -81,7 +81,7 @@ QDA & 99.3 & 98.0 \\
 \end{tabular} 
 \end{minipage}
 \begin{minipage}{0,6\textwidth}
-First we see that the model is linearly separable. IRLS scores perfectly on the training set outperforming the other models. However the situation is reversed on the test data. This means that the model overfitted the training data. LDA and Liogistic Regression have the same performance which is not a surprise considering that we have proven that the LDA performs in reality a logistic regression. Finally QDA has the worst performance on the training set, but outperforms IRLS on the test data. It is the only model to have improve its test score over its traing score which is great.
+In this dataset blue points and orange ones looks like they share the same covarience matrix $\Sigma$. This is confirmed by the great results of LDA which has the same success rate in the testing dataset of QDA which waives the equality of $\Sigma_1$ and $\Sigma_2$. IRLS acheived a 100\% success rate in the trainig set but it clearly overfitted on the training sample (it makes the worst score on the testing set). Finally linear regression performs quite well (almost the same results as LDA) which is not a surprise since the two sets are almost linearly separable.
 \end{minipage}
 \newpage
 \section{Dataset B}
@@ -89,23 +89,23 @@ First we see that the model is linearly separable. IRLS scores perfectly on the 
 \centering
 \begin{minipage}{0,45\textwidth}
 \caption{LDA}
-\includegraphics[scale=.5]{b_lda.png}
+\includegraphics[scale=.45]{b_lda.png}
 \end{minipage}
 \begin{minipage}{0,45\textwidth}
 \caption{IRLS}
-\includegraphics[scale=.5]{b_irls.png}
+\includegraphics[scale=.45]{b_irls.png}
 \end{minipage}
 \begin{minipage}{0,45\textwidth}
 \caption{Linear Regression}
-\includegraphics[scale=.5]{b_lr.png}
+\includegraphics[scale=.45]{b_lr.png}
 \end{minipage}
 \begin{minipage}{0,45\textwidth}
 \caption{QDA}
-\includegraphics[scale=.5]{b_qda.png}
+\includegraphics[scale=.45]{b_qda.png}
 \end{minipage}
 \end{figure}
 \begin{minipage}[c]{0,35\textwidth}
-Results\\
+Results (\% of success)\\
 \begin{tabular}{|c|c|c|}
 \hline 
 • & Train & Test \\ 
@@ -121,7 +121,7 @@ QDA & 98.7 & 98.0 \\
 \end{tabular} 
 \end{minipage}
 \begin{minipage}{0,6\textwidth}
-First we see that the model is linearly separable. IRLS scores perfectly on the training set outperforming the other models. However the situation is reversed on the test data. This means that the model overfitted the training data. LDA and Liogistic Regression have the same performance which is not a surprise considering that we have proven that the LDA performs in reality a logistic regression. Finally QDA has the worst performance on the training set, but outperforms IRLS on the test data. It is the only model to have improve its test score over its traing score which is great.
+In this dataset, the two distribution doesn't have the same covariance matrix therefore LDA is not the good algorithm to use. However if the two distribution follows indeed a normal distribution with different mean and covariance matrix QDA should perform really well. This assumption is verified by the preformance of QDA (it outperforms the other models). Linear regression and LDA gave the same boundary between both distribution; IRLS returns a shift of that same boundary which provide a better result in training but a worst results than the other two methods in testing.
 \end{minipage}
 \newpage
 \section{Dataset C}
@@ -129,23 +129,23 @@ First we see that the model is linearly separable. IRLS scores perfectly on the 
 \centering
 \begin{minipage}{0,45\textwidth}
 \caption{LDA}
-\includegraphics[scale=.5]{c_lda.png}
+\includegraphics[scale=.45]{c_lda.png}
 \end{minipage}
 \begin{minipage}{0,45\textwidth}
 \caption{IRLS}
-\includegraphics[scale=.5]{c_irls.png}
+\includegraphics[scale=.45]{c_irls.png}
 \end{minipage}
 \begin{minipage}{0,45\textwidth}
 \caption{Linear Regression}
-\includegraphics[scale=.5]{c_lr.png}
+\includegraphics[scale=.45]{c_lr.png}
 \end{minipage}
 \begin{minipage}{0,45\textwidth}
 \caption{QDA}
-\includegraphics[scale=.5]{c_qda.png}
+\includegraphics[scale=.45]{c_qda.png}
 \end{minipage}
 \end{figure}
 \begin{minipage}[c]{0,35\textwidth}
-Results\\
+Results (\% of success)\\
 \begin{tabular}{|c|c|c|}
 \hline 
 • & Train & Test \\ 
@@ -161,10 +161,8 @@ QDA & 94.8 & 96.2 \\
 \end{tabular} 
 \end{minipage}
 \begin{minipage}{0,6\textwidth}
-First we see that the model is linearly separable. IRLS scores perfectly on the training set outperforming the other models. However the situation is reversed on the test data. This means that the model overfitted the training data. LDA and Liogistic Regression have the same performance which is not a surprise considering that we have proven that the LDA performs in reality a logistic regression. Finally QDA has the worst performance on the training set, but outperforms IRLS on the test data. It is the only model to have improve its test score over its traing score which is great.
+In this dataset the orange distribution doesn't seem to follow a normal distribution because their are two modes. Therefore LDA and QDA eventhough they will provide a good approximation won't be the best option for that task. The two distribution aren't linearly separable; therefore the linear regression won't provide the best results. This leaves us with the logistic regression performed by the IRLS which as a matter of fact outperform the other models and manage to get the generalize surprisingly well the separation of the two distribution (its testing score is higher than its training one).
 \end{minipage}
-\newpage
-\section{Comments on the models}
 \newpage
 \section{Proof}
 \subsection{Exercise 1}

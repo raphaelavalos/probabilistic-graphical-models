@@ -3,6 +3,7 @@ import warnings
 # We ignore the RuntimeWarning of overflow in exp
 warnings.filterwarnings("ignore")
 
+
 def load_file(file_name):
     def convert(line):
         x1, x2, y = line.split()
@@ -13,18 +14,6 @@ def load_file(file_name):
     x, y = zip(*content)
     return np.array(x), np.array(y)
 
-
-a_x, a_y = load_file('data/classificationA.train')
-b_x, b_y = load_file('data/classificationB.train')
-c_x, c_y = load_file('data/classificationC.train')
-a_x_t, a_y_t = load_file('data/classificationA.test')
-b_x_t, b_y_t = load_file('data/classificationB.test')
-c_x_t, c_y_t = load_file('data/classificationC.test')
-
-x = a_x
-y = a_y
-x_t = c_x_t
-y_t = c_y_t
 
 d = dict()
 d['a'] = load_file('data/classificationA.train'), load_file('data/classificationA.test')

@@ -100,6 +100,9 @@ class IRLS:
         self.w = w
         self.fitted = True
 
+    # This fit works pretty well however it is not the actual formula of the IRLS but a modified version
+    # The diagonal matrix used is not eta*(1-eta) but only eta.
+
     def modified_fit(self, x, y):
         print('modified fit')
         X = np.c_[x, np.ones(len(x))]
@@ -120,19 +123,17 @@ class IRLS:
         else:
             self.normal_fit(x, y)
 
-    def predict(self, x, w=None):
-        if not self.fitted and (w is None):
+    def predict(self, x):
+        if not self.fitted :
             raise NameError('Not fitted')
-        if w is None:
-            w = self.w
         X = np.c_[x, np.ones(len(x))]
-        proba = sigmoid(X @ w)
+        proba = sigmoid(X @ self.w)
         prediction = np.zeros(len(x))
         prediction[proba > .5] = 1
         return prediction
 
-    def score(self, x, y, w=None):
-        return np.count_nonzero(self.predict(x, w) == y) / len(y)
+    def score(self, x, y):
+        return np.count_nonzero(self.predict(x) == y) / len(y)
 
     def plot(self, x, y):
         if not self.fitted:
