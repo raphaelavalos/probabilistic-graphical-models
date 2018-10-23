@@ -72,8 +72,6 @@ class IRLS:
         self.modifed = modified
         self.fitted = False
 
-    # In the following code the hessian and the grad is not of - log likelihood
-
     def normal_fit(self, x, y):
         X = np.c_[x, np.ones(len(x))]
         w = self.w
