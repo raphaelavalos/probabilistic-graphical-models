@@ -1,0 +1,65 @@
+\documentclass[a4paper]{article}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage{amsmath}
+\usepackage[
+  margin=1.5cm,
+  includefoot,
+  footskip=30pt,
+]{geometry}
+\usepackage{layout}
+\usepackage{graphicx}
+\title{Probabilistic Graphical Models : Homework 2}
+\author{Raphael Avalos\\raphael@avalos.fr}
+\date{2/11/18}
+\graphicspath{ {./plots/} }
+\begin{document}
+\maketitle
+\section{Exercise 1}
+\subsection{Question 1}
+The implied factorization for any joint distribution $p \in \mathcal{L}(G)$ is :
+$$ p(x,y,z,t) = p(x)p(y)p(z|x, y) p(t|z)$$
+Lets take $X\sim\mathcal{B}(p), Y\sim\mathcal{B}(p), Z=X \mathbin{\oplus} Y, T = Z$. It is clear that $X \perp\!\!\!\perp Y$ and that $X \perp\!\!\!\perp Y \not{\mid}\;Z$ because with $X$ and $Z$ we can determine $Y$. Therefore since $Z=T$, $X \perp\!\!\!\perp Y \not{\mid}\;T$
+\subsection{Question 2}
+\subsubsection*{1.2.a}
+We consider $Z \sim \mathcal{B}(\pi)$ with $X \perp\!\!\!\perp Y \mid \;Z$ and $X \perp\!\!\!\perp Y$. We can write $p(x,y)$ in two ways:
+\begin{align*}
+p(x,y) &= p(x,y\mid z=0)p(z=0) + p(x,y\mid z=)p(z=1) \\
+&= p(x\mid z=0)p(y\mid z=0)p(z=0) + p(x\mid z=1)p(y\mid z=1)p(z=1)
+\end{align*}
+And
+\begin{align*}
+p(x,y) &= p(x)p(y) \\
+&= [p(x \mid z=0)p(z=0) + p(x \mid z=1)p(z=1)][p(y \mid z=0)p(z=0) + p(y \mid z=1)p(z=1)]
+\end{align*}
+Then we take the difference between those two expressions of $p(x,y)$ and factorize by $p(z=0)p(z=1)\neq0$
+\begin{align*}
+0 &= p(x \mid z=0)p(y \mid z=0) - p(x \mid z=1)p(y \mid z=1) + p(x \mid z=0)p(y \mid z=1) + p(x \mid z=1)p(y \mid z=0)
+\end{align*}
+\subsubsection*{1.2.b}
+\newpage
+\section{Exercise 2}
+\subsection{Question 1}
+Let $G = (V,E)$ be a DAF, and $i\rightarrow j$ be a covered edge of $G$. We consider $G = (V,E^\prime)$ where $E^\prime = (E \setminus \{i \rightarrow j \}) \cup \{j \rightarrow i \}$.
+\begin{align*}
+p(x_j \mid x_{\pi_j^G})p(x_i \mid x_{\pi_i^G}) &= p(x_j \mid x_{\pi_i^G}, x_i)p(x_i \mid x_{\pi_i^G}) \\
+&= p(x_i \mid x_{\pi_i^G}, x_j)p(x_j \mid x_{\pi_i^G}) &\textit{(Bayes)} \\
+&= p(x_i \mid x_{\pi_i^{G^\prime}})p(x_j \mid x_{\pi_j^{G^\prime}})
+\end{align*}
+Since we haven't modified any other edges, we have proven that $\mathcal{L}(G) = \mathcal{L}(G^\prime)$
+\subsection{Question 2}
+Let $G=(V,E)$ a directed tree and $\tilde{G}$ the symmetrized graph (which is equal to moralized graph). The cliques of $\tilde{G}$ are by the definition of a tree the set $\mathcal{C} = \{ \pi_x \mid x \in V\} \cup V$. Now let $p \in \mathcal{L}(\tilde{G})$ and consider the $\psi$ such that $\sum_{x} \prod_{c\in \mathcal{C}} \psi_c(x_c) = 1$
+\begin{align*}
+p(x) &= \prod_{c \in \mathcal{C}}\psi_c(x_c) \\
+&= \prod_{x \in V}\psi_{x_i}(x_i)\psi_{x_i, \pi_{x_i}}(x_i,\pi_{x_i})
+\end{align*}
+We can define $f(x_i,x_{\pi_{x_i}}) = \prod_{x \in V}\psi_{x_i}(x_i)\psi_{x_i, \pi_{x_i}}(x_i,\pi_{x_i})$ and therefor $p \in \mathcal{L}(G)$. So $\mathcal{L}(\tilde{G}) \subset \mathcal{L}(G)$ \\
+Now let $p \in \mathcal{L}(G)$
+\begin{align*}
+p(x) &= \prod_{x \in V} p(x \mid x_{\pi_{x}}) \\
+&= \prod_{x \in V} \frac{p(\pi_{x} \mid x)}{p(\pi_x)} p(x)
+\end{align*}
+We can define $\psi_{x}(x) = p(x)$ and $\psi_{\pi_x}(\pi_x) = \frac{p(\pi_{x} \mid x)}{p(\pi_x)}$ and therefor $p \in \mathcal{L}(\tilde{G})$. So $\mathcal{L}(G) \subset \mathcal{L}(\tilde{G})$ \\
+Finally $\mathcal{L}(G) = \mathcal{L}(\tilde{G})$
+\end{document}

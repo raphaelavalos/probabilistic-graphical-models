@@ -3,3 +3,5 @@
 *.synctex.gz
 */.idea/*
 __pycache__
+
+Homework2/\.ipynb_checkpoints/
