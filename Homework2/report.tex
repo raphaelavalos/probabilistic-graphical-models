@@ -62,4 +62,67 @@ p(x) &= \prod_{x \in V} p(x \mid x_{\pi_{x}}) \\
 \end{align*}
 We can define $\psi_{x}(x) = p(x)$ and $\psi_{\pi_x}(\pi_x) = \frac{p(\pi_{x} \mid x)}{p(\pi_x)}$ and therefor $p \in \mathcal{L}(\tilde{G})$. So $\mathcal{L}(G) \subset \mathcal{L}(\tilde{G})$ \\
 Finally $\mathcal{L}(G) = \mathcal{L}(\tilde{G})$
+\newpage
+\section{Exercise 3}
+\subsection{K-mean}
+We programmed k-mean++.\\\\
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+\hline 
+• & \multicolumn{2}{c|}{Centroid 1} & \multicolumn{2}{c|}{Centroid 2} & \multicolumn{2}{c|}{Centroid 2} & \multicolumn{2}{c|}{Centroid 4} & Distortion \\ 
+\hline 
+1 & 3.78809 & 4.99905 & -3.79520 & -4.24816 &  3.48330 & -2.84991 & -2.14180 & 3.97338 & 3241.28275 \\ 
+\hline 
+2 &  3.80280 & 5.10467 & -3.81879 & -4.27423 & 3.33557 & -2.64452 & -2.240347  & 4.12744 & 3237.77959 \\ 
+\hline 
+3 &  3.80280 & 5.10467 & -3.81879 & -4.27423 & 3.33557 & -2.64452 & -2.24034 & 4.12744 & 3237.77959 \\ 
+\hline 
+4 &  3.78809 & 4.99905 & -3.66286 & -4.11101 & 3.60401 & -2.88772 & -2.15095 & 4.04338 & 3239.87631 \\ 
+\hline
+5 &  3.80280 & 5.10467 & -3.81879 & -4.27423 & 3.33557 & -2.64452 & -2.24034 & 4.12744 & 3237.77959 \\ 
+\hline 
+\end{tabular}
+\\\\
+The algorithm is quite stable, in 5 runs we had 3 times the same result and the other two have a 2 and 4 increase in distortion.
+\subsection{EM: Covariance proportional to identity}
+By applying the method of the EM algorithm we find the following.\\
+The E step consist in the update of the latent varialble $q$
+\begin{align*}
+q^{t+1}_{k,n} = \frac{\pi_k^t p(x_n \mid \mu_k^t, {\sigma_k^t}^2)}{\sum_{x} \pi_k^t p(x \mid \mu_k^t, {\sigma_k^t}^2)} =
+\frac{\frac{\pi_k^t}{\sigma_k^t} exp(-\frac{1}{2{\sigma_k^t}^2}(x_n-\mu_k^t)^T(x_n - \mu_k^t))}{\sum_{x} \frac{\pi_k^t}{\sigma_k^t} exp(-\frac{1}{2{\sigma_k^t}^2}(x-\mu_k^t)^T(x-\mu_k^t))}
+\end{align*}
+The M step consist in the update of $pi, \sigma, \mu$
+\begin{align*}
+\pi_k^{t+1} &= \frac{\sum_n q^{t+1}_{k,n}}{N} \\
+\mu_k^{t+1} &= \frac{\sum_n q^{t+1}_{k,n}x_n}{\sum_n q^{t+1}_{k,n}}\\
+{\sigma_k^{t+1}}^2 &= \frac{\sum_n q^{t+1}_{k,n}(x_n-\mu_k^t)^T(x_n - \mu_k^t)}{d\sum_n q^{t+1}_{k,n}}
+\end{align*}
+\subsection{EM: General}
+\begin{align*}
+q^{t+1}_{k,n} &= \frac{\pi_k^t p(x_n \mid \mu_k^t, \Sigma_k^t)}{\sum_{x} \pi_k^t p(x \mid \mu_k^t, \Sigma_k^t)} =
+\frac{\frac{\pi_k^t}{\sqrt{\mid \Sigma_k^t \mid}} exp(-\frac{1}{2}(x_n-\mu_k^t)^T {\Sigma_k^t}^{-1} (x_n - \mu_k^t))}{\sum_{x} \frac{\pi_k^t}{\sqrt{\mid \Sigma_k^t \mid}} exp(-\frac{1}{2}(x-\mu_k^t)^T{\Sigma_k^t}^{-1}(x-\mu_k^t))} \\
+\Sigma_k^{t+1} &= \frac{\sum_n q^{t+1}_{k,n}(x_n-\mu_k^t)(x_n - \mu_k^t)^T}{\sum_n q^{t+1}_{k,n}}
+\end{align*}
+\subsection{Evaluation}
+\begin{tabular}{|c|c|c|}
+\hline 
+Log Likelihood & Iso & General \\ 
+\hline 
+Train & $-2689$ & $-2345$ \\ 
+\hline 
+Test & $-2665$ & $-2426$ \\
+\hline
+[Train,Test] & $-5326= -2663 * 2$ & $-4744=-2372*2$  \\
+\hline 
+\end{tabular}
+\\\\
+First, we made sure that the test data and the train data both have the same size, and therefore the comparaison of the log likelihood makes sense.
+Based on the log likelihoods we can deduce that by taking $\Sigma$ proportional to the identity we produce results that are worst compared to the general case. This is not a surprise considering that the clusters aren't spheres. The other result that we can deduce from this comparaison is that the general case seems to have overfitted way more than the iso one.
+\newpage
+\section{Plots}
+\begin{figure}[hbtp]
+\caption{K-Mean++}
+\centering
+\includegraphics[scale=.4]{kmean.png}
+\end{figure}
+
 \end{document}

@@ -124,11 +124,11 @@ class EM:
                 # M step: update pi, mus and sigma
                 pi = latent.sum(axis=1)/n
                 mus = (latent @ x) / latent.sum(axis=1).reshape(4,1)
-                sigmas = np.array([(latent[k].reshape(500,1) * (x - mus[k])).T @ (x - mus[k]) / latent[k].sum() for k in range(self.n_clusters)])
+                sigmas = np.array([(latent[k].reshape(n,1) * (x - mus[k])).T @ (x - mus[k]) / latent[k].sum() for k in range(self.n_clusters)])
                 j +=1
         self.pi = pi
         self.mus = mus
-        self.latent =latent
+        self.latent = latent
         self.sigmas = sigmas
         self.labels = labels
         self.fitted = True
@@ -140,3 +140,16 @@ class EM:
         sns.scatterplot(x=self.x[:, 0], y=self.x[:, 1], hue=self.labels, palette=palette)
         plt.scatter(x=self.mus[:, 0], y=self.mus[:, 1], color='black')
         plt.show()
+
+    def predict(self, x):
+        n, d = self.x.shape
+        if self.sphere:
+            log_proba = np.array([np.log(self.pi[k]) -d/2 * np.log(2*np.pi) - d * np.log(self.sigmas[k]) - np.square(np.linalg.norm(x - self.mus[k], axis=1))/(2*self.sigmas[k]**2) for k in range(self.n_clusters)])
+        else:
+            inv_sigmas = np.linalg.inv(self.sigmas)
+            det_sigmas = np.linalg.det(self.sigmas)
+            log_proba = np.array([np.log(self.pi[k]) - d / 2 * np.log(2 * np.pi) - .5 * np.log(det_sigmas[k]) - 0.5 * np.einsum('ij,ij->i', (x - self.mus[k]) @ inv_sigmas[k], x - self.mus[k]) for k in range(self.n_clusters)])
+        labels = log_proba.argmax(axis=0)
+        log_likelihood = log_proba.max(axis=0).sum()
+        return labels, log_likelihood
+

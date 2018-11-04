@@ -1,11 +1,19 @@
 import numpy as np
+from models import *
 
+x = load_file('data/EMGaussian.data')
+x_test = load_file('data/EMGaussian.test')
+for i in range(0):
+    kmean = KMeans()
+    dist = kmean.fit(x, return_distortion=True)
+    print('Dist', dist)
+    print('centroids ', kmean.cluster_centers_)
+    kmean.plot(x)
+    plt.show()
 
-def load_file(file_name):
-    def convert(line):
-        x1, x2 = line.split()
-        return np.array([np.float(x1), np.float(x2)])
-
-    with open(file_name) as f:
-        content = np.array([convert(line) for line in f])
-    return content
+em = EM()
+em.fit(x,sphere=False)
+em.plot()
+print(em.mus)
+_, logl_train = em.predict(x)
+_, logl_test = em.predict(x_test)
