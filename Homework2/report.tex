@@ -107,22 +107,36 @@ q^{t+1}_{k,n} &= \frac{\pi_k^t p(x_n \mid \mu_k^t, \Sigma_k^t)}{\sum_{x} \pi_k^t
 \hline 
 Log Likelihood & Iso & General \\ 
 \hline 
-Train & $-2689$ & $-2345$ \\ 
+Train & $-2682$ & $-2345$ \\ 
 \hline 
-Test & $-2665$ & $-2426$ \\
+Test  & $-2733$ & $-2426$ \\
 \hline
 [Train,Test] & $-5326= -2663 * 2$ & $-4744=-2372*2$  \\
 \hline 
 \end{tabular}
 \\\\
 First, we made sure that the test data and the train data both have the same size, and therefore the comparaison of the log likelihood makes sense.
-Based on the log likelihoods we can deduce that by taking $\Sigma$ proportional to the identity we produce results that are worst compared to the general case. This is not a surprise considering that the clusters aren't spheres. The other result that we can deduce from this comparaison is that the general case seems to have overfitted way more than the iso one.
+Based on the log likelihoods we can deduce that by taking $\Sigma$ proportional to the identity we produce results that are worst compared to the general case. This is not a surprise considering that the clusters aren't spheres. The other result that we can deduce from this comparaison is that the general case seems to have overfitted more than the iso one.
 \newpage
 \section{Plots}
-\begin{figure}[hbtp]
-\caption{K-Mean++}
+
+
+\begin{figure}[h]
 \centering
-\includegraphics[scale=.4]{kmean.png}
+\begin{minipage}{0,35\textwidth}
+\caption{K-mean ++}
+\includegraphics[scale=.35]{kmean.png}
+\end{minipage}
+\\
+\begin{minipage}{0,35\textwidth}
+\caption{EM ISO}
+\includegraphics[scale=.35]{em_iso.png}
+\end{minipage}
+\\
+\begin{minipage}{0,35\textwidth}
+\caption{EM General}
+\includegraphics[scale=.35]{em_general.png}
+\end{minipage}
 \end{figure}
 
 \end{document}

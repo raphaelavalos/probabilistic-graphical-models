@@ -1,12 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
 import sklearn.metrics as sm
 import seaborn as sns
+
 flatui = ["#9b59b6", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
 sns.palplot(sns.color_palette(flatui))
 
 
 def load_file(file_name):
+    '''
+    Convert the file to an array
+    :param file_name: path of the file, each line of the file is of the form x y
+    :type file_name: str
+    :return: Array of the coordinates described by the file
+    :rtype: numpy.array
+    '''
+
     def convert(line):
         x1, x2 = line.split()
         return np.array([np.float(x1), np.float(x2)])
@@ -17,6 +27,10 @@ def load_file(file_name):
 
 
 class KMeans:
+    '''
+    Class that perform k-mean clustering algorithm, support k-means++
+    '''
+
     def __init__(self, n_clusters=4, init='k-means++', max_iter=300, epsilon=10 ** (-4)):
         self.n_clusters = n_clusters
         self.init = init
@@ -59,13 +73,16 @@ class KMeans:
         if labels is None:
             labels = self.labels_
         palette = sns.color_palette("husl", n_colors=self.n_clusters)
-        sns.scatterplot(x=x[:,0], y=x[:,1], hue=labels, palette=palette)
-        plt.scatter(x=self.cluster_centers_[:,0], y=self.cluster_centers_[:,1], color='black')
+        sns.scatterplot(x=x[:, 0], y=x[:, 1], hue=labels, palette=palette)
+        plt.scatter(x=self.cluster_centers_[:, 0], y=self.cluster_centers_[:, 1], color='black')
         plt.show()
 
 
-
 class EM:
+    '''
+    Class that perform the EM algorithm
+    '''
+
     def __init__(self, n_clusters=4, max_iter=300, epsilon=10 ** (-4)):
         self.n_clusters = n_clusters
         self.epsilon = epsilon
@@ -75,12 +92,12 @@ class EM:
         self.latent = np.zeros((2, self.n_clusters))
         self.pi = np.zeros(self.n_clusters)
         self.fitted = False
-        self.sphere = False
+        self.iso = False
         self.x = None
         self.labels = None
 
-    def fit(self, x, sphere=True):
-        self.sphere = sphere
+    def fit(self, x, iso=True):
+        self.iso = iso
         self.x = x
         n, d = x.shape
         plt.scatter(x=x[:, 0], y=x[:, 1])
@@ -94,38 +111,45 @@ class EM:
         pi = np.array([np.count_nonzero(kmean.labels_ == k) for k in range(self.n_clusters)]) / len(x)
         j = 0
         update = True
-        if sphere:
+        if iso:
             sigmas = np.array(
                 [np.sqrt(np.diag(np.cov(x_reduced[kmean.labels_ == i].T))).mean() for i in range(self.n_clusters)])
             while j < self.max_iter and True:
                 # E step: update latent
-                latent = np.array([pi[i] * np.exp(-np.square(np.linalg.norm(x - mus[i], axis=1))/(2*sigmas[i]**2))/sigmas[i]**d for i in range(self.n_clusters)])
+                latent = np.array([pi[i] * np.exp(
+                    -np.square(np.linalg.norm(x - mus[i], axis=1)) / (2 * sigmas[i] ** 2)) / sigmas[i] ** d for i in
+                                   range(self.n_clusters)])
                 latent /= latent.sum(axis=0)
                 new_labels = np.argmax(latent, axis=0)
-                update = not (labels==new_labels).all()
+                update = not (labels == new_labels).all()
                 labels = new_labels
                 # M step: update pi, mus and sigma
-                pi = latent.sum(axis=1)/n
-                mus = (latent @ x) / latent.sum(axis=1).reshape(4,1)
-                sigmas = np.array([latent[k] @ np.square(np.linalg.norm(x - mus[k], axis=1)) for k in range(self.n_clusters)]) / (d * latent.sum(axis=1))
+                pi = latent.sum(axis=1) / n
+                mus = (latent @ x) / latent.sum(axis=1).reshape(4, 1)
+                sigmas = np.array(
+                    [latent[k] @ np.square(np.linalg.norm(x - mus[k], axis=1)) for k in range(self.n_clusters)]) / (
+                                     d * latent.sum(axis=1))
                 sigmas = np.sqrt(sigmas)
-                j +=1
+                j += 1
         else:
             sigmas = np.array([np.array(np.cov(x_reduced[kmean.labels_ == i].T)) for i in range(self.n_clusters)])
             while j < self.max_iter and True:
                 # E step: update latent
                 inv_sigmas = np.linalg.inv(sigmas)
                 det_sigmas = np.linalg.det(sigmas)
-                latent = np.array([pi[i] * np.exp(- 0.5 * np.einsum('ij,ij->i', (x - mus[i]) @ inv_sigmas[i], x - mus[i]))/np.sqrt(det_sigmas[i]) for i in range(self.n_clusters)])
+                latent = np.array([pi[i] * np.exp(
+                    - 0.5 * np.einsum('ij,ij->i', (x - mus[i]) @ inv_sigmas[i], x - mus[i])) / np.sqrt(det_sigmas[i])
+                                   for i in range(self.n_clusters)])
                 latent /= latent.sum(axis=0)
                 new_labels = np.argmax(latent, axis=0)
-                update = not (labels==new_labels).all()
+                update = not (labels == new_labels).all()
                 labels = new_labels
                 # M step: update pi, mus and sigma
-                pi = latent.sum(axis=1)/n
-                mus = (latent @ x) / latent.sum(axis=1).reshape(4,1)
-                sigmas = np.array([(latent[k].reshape(n,1) * (x - mus[k])).T @ (x - mus[k]) / latent[k].sum() for k in range(self.n_clusters)])
-                j +=1
+                pi = latent.sum(axis=1) / n
+                mus = (latent @ x) / latent.sum(axis=1).reshape(4, 1)
+                sigmas = np.array([(latent[k].reshape(n, 1) * (x - mus[k])).T @ (x - mus[k]) / latent[k].sum() for k in
+                                   range(self.n_clusters)])
+                j += 1
         self.pi = pi
         self.mus = mus
         self.latent = latent
@@ -134,22 +158,38 @@ class EM:
         self.fitted = True
 
     def plot(self):
+        s = 4.605
         if not self.fitted:
             raise NameError('Not fitted')
         palette = sns.color_palette("husl", n_colors=self.n_clusters)
-        sns.scatterplot(x=self.x[:, 0], y=self.x[:, 1], hue=self.labels, palette=palette)
+        ax = sns.scatterplot(x=self.x[:, 0], y=self.x[:, 1], hue=self.labels, palette=palette)
         plt.scatter(x=self.mus[:, 0], y=self.mus[:, 1], color='black')
+        if self.iso:
+            for k in range(self.n_clusters):
+                ax.add_artist(
+                    Ellipse(self.mus[k], width=2 * self.sigmas[k] * np.sqrt(s), height=2 * self.sigmas[k] * np.sqrt(s),
+                            angle=0, facecolor=None, fill=False,
+                            color='black'))
+        else:
+            for k in range(self.n_clusters):
+                l, P = np.linalg.eigh(self.sigmas[k])
+                ax.add_artist(Ellipse(self.mus[k], width=2 * np.sqrt(l[0] * s), height=2 * np.sqrt(l[1] * s),
+                                      angle=np.arctan(P[1, 0] / P[0, 0]) * 180 / np.pi, facecolor=None, fill=False,
+                                      color='black'))
         plt.show()
 
     def predict(self, x):
         n, d = self.x.shape
-        if self.sphere:
-            log_proba = np.array([np.log(self.pi[k]) -d/2 * np.log(2*np.pi) - d * np.log(self.sigmas[k]) - np.square(np.linalg.norm(x - self.mus[k], axis=1))/(2*self.sigmas[k]**2) for k in range(self.n_clusters)])
+        if self.iso:
+            log_proba = np.array([np.log(self.pi[k]) - d / 2 * np.log(2 * np.pi) - d * np.log(
+                self.sigmas[k]) - np.square(np.linalg.norm(x - self.mus[k], axis=1)) / (2 * self.sigmas[k] ** 2) for k
+                                  in range(self.n_clusters)])
         else:
             inv_sigmas = np.linalg.inv(self.sigmas)
             det_sigmas = np.linalg.det(self.sigmas)
-            log_proba = np.array([np.log(self.pi[k]) - d / 2 * np.log(2 * np.pi) - .5 * np.log(det_sigmas[k]) - 0.5 * np.einsum('ij,ij->i', (x - self.mus[k]) @ inv_sigmas[k], x - self.mus[k]) for k in range(self.n_clusters)])
+            log_proba = np.array([np.log(self.pi[k]) - d / 2 * np.log(2 * np.pi) - .5 * np.log(
+                det_sigmas[k]) - 0.5 * np.einsum('ij,ij->i', (x - self.mus[k]) @ inv_sigmas[k], x - self.mus[k]) for k
+                                  in range(self.n_clusters)])
         labels = log_proba.argmax(axis=0)
         log_likelihood = log_proba.max(axis=0).sum()
         return labels, log_likelihood
-
