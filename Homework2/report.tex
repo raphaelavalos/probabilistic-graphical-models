@@ -25,7 +25,7 @@ Lets take $X\sim\mathcal{B}(p), Y\sim\mathcal{B}(p), Z=X \mathbin{\oplus} Y, T =
 \subsubsection*{1.2.a}
 We consider $Z \sim \mathcal{B}(\pi)$ with $X \perp\!\!\!\perp Y \mid \;Z$ and $X \perp\!\!\!\perp Y$. We can write $p(x,y)$ in two ways:
 \begin{align*}
-p(x,y) &= p(x,y\mid z=0)p(z=0) + p(x,y\mid z=)p(z=1) \\
+p(x,y) &= p(x,y\mid z=0)p(z=0) + p(x,y\mid z=1)p(z=1) \\
 &= p(x\mid z=0)p(y\mid z=0)p(z=0) + p(x\mid z=1)p(y\mid z=1)p(z=1)
 \end{align*}
 And
@@ -35,8 +35,10 @@ p(x,y) &= p(x)p(y) \\
 \end{align*}
 Then we take the difference between those two expressions of $p(x,y)$ and factorize by $p(z=0)p(z=1)\neq0$
 \begin{align*}
-0 &= p(x \mid z=0)p(y \mid z=0) - p(x \mid z=1)p(y \mid z=1) + p(x \mid z=0)p(y \mid z=1) + p(x \mid z=1)p(y \mid z=0)
+0 &= - p(x \mid z=0)p(y \mid z=0) - p(x \mid z=1)p(y \mid z=1) + p(x \mid z=0)p(y \mid z=1) + p(x \mid z=1)p(y \mid z=0) \\
+0 &= [p(x \mid z=0) - p(x \mid z=1)][p(y \mid z=0) - p(y \mid z=1)]
 \end{align*}
+Therefore, $X \perp\!\!\!\perp T$ or $Y \perp\!\!\!\perp T$
 \subsubsection*{1.2.b}
 \newpage
 \section{Exercise 2}
@@ -49,18 +51,18 @@ p(x_j \mid x_{\pi_j^G})p(x_i \mid x_{\pi_i^G}) &= p(x_j \mid x_{\pi_i^G}, x_i)p(
 \end{align*}
 Since we haven't modified any other edges, we have proven that $\mathcal{L}(G) = \mathcal{L}(G^\prime)$
 \subsection{Question 2}
-Let $G=(V,E)$ a directed tree and $\tilde{G}$ the symmetrized graph (which is equal to moralized graph). The cliques of $\tilde{G}$ are by the definition of a tree the set $\mathcal{C} = \{ \pi_x \mid x \in V\} \cup V$. Now let $p \in \mathcal{L}(\tilde{G})$ and consider the $\psi$ such that $\sum_{x} \prod_{c\in \mathcal{C}} \psi_c(x_c) = 1$
+Let $G=(V,E)$ a directed tree and $\tilde{G}$ the symmetrized graph (which is equal to moralized graph). The cliques of $\tilde{G}$ are by the definition of a tree the set $\mathcal{C} = \{ (x,\pi_x) \mid x \in V\} \cup V$. Now let $p \in \mathcal{L}(\tilde{G})$ and consider the $\psi$ such that $\sum_{x} \prod_{c\in \mathcal{C}} \psi_c(x_c) = 1$, and $x_r$ be the root node.
 \begin{align*}
 p(x) &= \prod_{c \in \mathcal{C}}\psi_c(x_c) \\
-&= \prod_{x \in V}\psi_{x_i}(x_i)\psi_{x_i, \pi_{x_i}}(x_i,\pi_{x_i})
+&= \prod_{x_i \in V \setminus \{x_r\}} \psi_{x_i}(x_i)\psi_{x_i, \pi_{x_i}}(x_i,\pi_{x_i}) \psi_{x_r}(x_r)
 \end{align*}
-We can define $f(x_i,x_{\pi_{x_i}}) = \prod_{x \in V}\psi_{x_i}(x_i)\psi_{x_i, \pi_{x_i}}(x_i,\pi_{x_i})$ and therefor $p \in \mathcal{L}(G)$. So $\mathcal{L}(\tilde{G}) \subset \mathcal{L}(G)$ \\
-Now let $p \in \mathcal{L}(G)$
+We can define $f(x_r,x_{\pi_{x_r}}) \propto \psi_{x_r}(x_r)$, $f(x_i,x_{\pi_{x_i}}) \propto \psi_{x_i}(x_i)\psi_{x_i, \pi_{x_i}}(x_i,\pi_{x_i})$ such that $ \forall i, x_{\pi_i}, \sum_{x_i} f(x_i, x_{\pi_{x_i}}) = 1 $ and therefore $p \in \mathcal{L}(G)$. So $\mathcal{L}(\tilde{G}) \subset \mathcal{L}(G)$ \\
+Now let $p \in \mathcal{L}(G)$ and $x_r$ be the root node.
 \begin{align*}
-p(x) &= \prod_{x \in V} p(x \mid x_{\pi_{x}}) \\
-&= \prod_{x \in V} \frac{p(\pi_{x} \mid x)}{p(\pi_x)} p(x)
+p(x) &= \prod_{x_i \in V \setminus \{x_r\}} p(x_i \mid x_{\pi_{x_i}}) p(x_r) \\
+&\propto \prod_{x_i \in V \setminus \{x_r\}} p(x_{\pi_{x_i}} \mid x_i) p(x_i) p(x_r)
 \end{align*}
-We can define $\psi_{x}(x) = p(x)$ and $\psi_{\pi_x}(\pi_x) = \frac{p(\pi_{x} \mid x)}{p(\pi_x)}$ and therefor $p \in \mathcal{L}(\tilde{G})$. So $\mathcal{L}(G) \subset \mathcal{L}(\tilde{G})$ \\
+We can define $\psi_{x_r}(x_r) = p(x_r)$, $\psi_{x_i}(x_i) = p(x_i)$ and $\psi_{x_i,\pi_{x_i}}(x_i,\pi_{x_i}) = p(\pi_{x_i} \mid x_i)$ and therefore $p \in \mathcal{L}(\tilde{G})$. So $\mathcal{L}(G) \subset \mathcal{L}(\tilde{G})$ \\
 Finally $\mathcal{L}(G) = \mathcal{L}(\tilde{G})$
 \newpage
 \section{Exercise 3}
